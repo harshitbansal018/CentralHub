@@ -41,14 +41,17 @@ const Auth = () => {
         return;
       }
 
-     if (isLogin) {
+  if (isLogin) {
+  // ✅ store token + user
   localStorage.setItem("token", data.token);
+  localStorage.setItem("user", JSON.stringify(data.user));
+
   setMessage("Login successful 🚀");
 
-  // ✅ redirect to dashboard
+  // ✅ IMPORTANT: redirect using React Router (better than reload)
   setTimeout(() => {
     window.location.href = "/dashboard";
-  }, 1000);
+  }, 500);
 } else {
         setMessage("Registered successfully ✅");
         setIsLogin(true); // switch to login

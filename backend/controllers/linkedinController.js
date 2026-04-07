@@ -17,18 +17,12 @@ export const redirectToLinkedIn = (req, res) => {
 
   const token = req.query.token; // ✅ get token
 
-  const url = `https://www.linkedin.com/oauth/v2/authorization
-  ?response_type=code
-  &client_id=${linkedinConfig.clientId}
-  &redirect_uri=${linkedinConfig.redirectUri}
-  &scope=${encodeURIComponent(scope)}
-  &state=${token}`; // ✅ send token in state
+  const url = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${linkedinConfig.clientId}&redirect_uri=${linkedinConfig.redirectUri}&scope=${encodeURIComponent(scope)}&state=${token}`;
 
   res.redirect(url);
 };
 
 // 🔹 Callback (FIXED WITH EXPIRY)
-
 
 export const handleLinkedInCallback = async (req, res) => {
   const { code, state } = req.query;
@@ -51,7 +45,7 @@ export const handleLinkedInCallback = async (req, res) => {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
-      }
+      },
     );
 
     const accessToken = tokenRes.data.access_token;
@@ -60,27 +54,18 @@ export const handleLinkedInCallback = async (req, res) => {
     const expiresAt = Date.now() + expiresIn * 1000;
 
     // ✅ Get LinkedIn user
-    const userRes = await axios.get(
-      "https://api.linkedin.com/v2/userinfo",
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    );
+    const userRes = await axios.get("https://api.linkedin.com/v2/userinfo", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
 
     const linkedinId = userRes.data.sub;
 
     // ✅ Save with correct user
-    await saveLinkedInAccount(
-      userId,
-      linkedinId,
-      accessToken,
-      expiresAt
-    );
+    await saveLinkedInAccount(userId, linkedinId, accessToken, expiresAt);
 
     res.redirect("http://localhost:5173/create-post?linkedin=connected");
-
   } catch (error) {
     console.log("FULL ERROR:", error.response?.data || error);
     res.status(500).json({ error: "LinkedIn auth failed" });
@@ -89,7 +74,7 @@ export const handleLinkedInCallback = async (req, res) => {
 // 🔹 TEXT POST
 export const postToLinkedIn = async (req, res) => {
   const { caption } = req.body;
-  const userId = req.user.userId;;
+  const userId = req.user.userId;
 
   try {
     const account = await getLinkedInAccount(userId);
@@ -125,13 +110,12 @@ export const postToLinkedIn = async (req, res) => {
           Authorization: `Bearer ${account.access_token}`,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
 
     await savePost(userId, caption, null, "linkedin");
 
     res.json({ message: "Post successful 🚀", data: response.data });
-
   } catch (error) {
     console.error(error.response?.data || error.message);
     res.status(500).json({ error: "Post failed" });
@@ -141,7 +125,7 @@ export const postToLinkedIn = async (req, res) => {
 // 🔥 IMAGE POST (FINAL FIX)
 export const postImageToLinkedIn = async (req, res) => {
   const { caption } = req.body;
-  const userId = req.user.userId;;
+  const userId = req.user.userId;
 
   try {
     const account = await getLinkedInAccount(userId);
@@ -180,7 +164,7 @@ export const postImageToLinkedIn = async (req, res) => {
           Authorization: `Bearer ${account.access_token}`,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
 
     const uploadUrl =
@@ -219,7 +203,7 @@ export const postImageToLinkedIn = async (req, res) => {
           Authorization: `Bearer ${account.access_token}`,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
 
     // ✅ Save only filename
@@ -229,7 +213,6 @@ export const postImageToLinkedIn = async (req, res) => {
       message: "Image post successful 🚀",
       data: postRes.data,
     });
-
   } catch (error) {
     console.error(error.response?.data || error.message);
     res.status(500).json({ error: "Image post failed" });
@@ -254,7 +237,6 @@ export const getLinkedInStatus = async (req, res) => {
       connected: true,
       expires_at: account.expires_at,
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to get status" });
