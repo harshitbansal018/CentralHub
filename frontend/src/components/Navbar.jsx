@@ -10,9 +10,12 @@ const Navbar = () => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+   
     navigate("/");
     window.location.reload();
   };
+   const user = JSON.parse(localStorage.getItem("user"));
+    const firstLetter = user ? user.name.charAt(0).toUpperCase() : "";
 
   return (
     <nav className="flex justify-between items-center px-6 py-4 bg-black text-white">
@@ -21,6 +24,7 @@ const Navbar = () => {
       <div className="flex gap-3">
         {isLoggedIn ? (
           <>
+      
             <Link to="/dashboard" className="px-4 py-2 bg-gray-800 rounded">
               Dashboard
             </Link>
@@ -29,6 +33,9 @@ const Navbar = () => {
               Create Post
             </Link>
 
+    <div className="w-10 h-10 flex items-center justify-center bg-blue-500 rounded-full text-white font-bold">
+    {firstLetter}
+  </div>
             <button
               onClick={handleLogout}
               className="px-4 py-2 bg-red-500 rounded"

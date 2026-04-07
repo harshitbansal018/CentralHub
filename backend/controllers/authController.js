@@ -48,7 +48,7 @@ export const login = async (req, res) => {
     const token = jwt.sign(
       { userId: user.id },
       JWT_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: "1h" }
     );
 
     // ✅ ONLY ONE RESPONSE
